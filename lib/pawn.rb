@@ -7,3 +7,5 @@ class Pawn
     @pawn = " \u265F".colorize(:color => :light_blue, :background => :red)
   end
 end
+
+# comment
