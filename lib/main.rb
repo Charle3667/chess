@@ -4,7 +4,10 @@ p String.colors
 
 game = GameBoard.new
 game.display_board
-game.place_pawn(2, 2)
+game.set_board
+game.display_board
+# game.pawn_positions
+game.move
 game.display_board
 game.move
 game.display_board
