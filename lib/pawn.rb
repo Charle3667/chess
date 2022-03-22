@@ -4,38 +4,70 @@ require_relative 'game_board.rb'
 class Pawn
   attr_accessor :piece, :position, :team
 
-  def initialize(y, x)
-    @team = 'white'
+  def initialize(y, x, team)
+    @team = team
     @base = [y,x]
     @position = [y, x]
-    @piece = @position[0] % 2 == 0 ? (@position[1] % 2 == 0 ? " \u2659 ".colorize( :background => :light_black)  : " \u2659 ".colorize( :background => :light_magenta)) : (@position[1] % 2 == 0 ? " \u2659 ".colorize( :background => :light_magenta)  : " \u2659 ".colorize( :background => :light_black))
+    if team == 'white'
+      @piece = @position[0] % 2 == 0 ? (@position[1] % 2 == 0 ? " \u2659 ".colorize( :background => :light_black)  : " \u2659 ".colorize( :background => :light_magenta)) : (@position[1] % 2 == 0 ? " \u2659 ".colorize( :background => :light_magenta)  : " \u2659 ".colorize( :background => :light_black))
+    else
+      @piece = @position[0] % 2 == 0 ? (@position[1] % 2 == 0 ? " \u265F ".colorize( :color => :black, :background => :light_black)  : " \u265F ".colorize( :color => :black, :background => :light_magenta)) : (@position[1] % 2 == 0 ? " \u265F ".colorize( :color => :black, :background => :light_magenta)  : " \u265F ".colorize( :color => :black, :background => :light_black))
+    end
   end
 
   def move_set(move)
-    possible_move_one = [(@position[0] - 1), @position[1]]
-    possible_move_two = [(@position[0] - 2), @position[1]]
-    if @position == @base
-      if move == possible_move_one || move == possible_move_two
-        true
+    white_move_one = [(@position[0] - 1), @position[1]]
+    white_move_two = [(@position[0] - 2), @position[1]]
+    black_move_one = [(@position[0] + 1), @position[1]]
+    black_move_two = [(@position[0] + 2), @position[1]]
+    if @team == 'white'
+      if @position == @base
+        if move == white_move_one || move == white_move_two
+          true
+        else
+          false
+        end
       else
-        false
+        if move == white_move_one
+          true
+        else
+          false
+        end
       end
-    else
-      if move == possible_move_one
-        true
+    elsif @team == 'black'
+      if @position == @base
+        if move == black_move_one || move == black_move_two
+          true
+        else
+          false
+        end
       else
-        false
+        if move == black_move_one
+          true
+        else
+          false
+        end
       end
     end
   end
 
   def attack_set(move)
-    possible_move_one = [(@position[0] - 1), (@position[1] - 1)]
-    possible_move_two = [(@position[0] - 1), (@position[1] + 1)]
-    if move == possible_move_one || move == possible_move_two
-      true
-    else
-      false
+    white_move_one = [(@position[0] - 1), (@position[1] - 1)]
+    white_move_two = [(@position[0] - 1), (@position[1] + 1)]
+    black_move_one = [(@position[0] + 1), (@position[1] - 1)]
+    black_move_two = [(@position[0] + 1), (@position[1] + 1)]
+    if @team == 'white'
+      if move == white_move_one || move == white_move_two
+        true
+      else
+        false
+      end
+    elsif @team == 'black'
+      if move == black_move_one || move == black_move_two
+        true
+      else
+        false
+      end
     end
   end
 
@@ -44,7 +76,11 @@ class Pawn
   end
 
   def update_piece
-    @peice = @position[0] % 2 == 0 ? (@position[1] % 2 == 0 ? " \u2659 ".colorize( :background => :light_black)  : " \u2659 ".colorize( :background => :light_magenta)) : (@position[1] % 2 == 0 ? " \u2659 ".colorize( :background => :light_magenta)  : " \u2659 ".colorize( :background => :light_black))
+    if team == 'white'
+      @piece = @position[0] % 2 == 0 ? (@position[1] % 2 == 0 ? " \u2659 ".colorize( :background => :light_black)  : " \u2659 ".colorize( :background => :light_magenta)) : (@position[1] % 2 == 0 ? " \u2659 ".colorize( :background => :light_magenta)  : " \u2659 ".colorize( :background => :light_black))
+    else
+      @piece = @position[0] % 2 == 0 ? (@position[1] % 2 == 0 ? " \u265F ".colorize( :color => :black, :background => :light_black)  : " \u265F ".colorize( :color => :black, :background => :light_magenta)) : (@position[1] % 2 == 0 ? " \u265F ".colorize( :color => :black, :background => :light_magenta)  : " \u265F ".colorize( :color => :black, :background => :light_black))
+    end
   end
 end
 
