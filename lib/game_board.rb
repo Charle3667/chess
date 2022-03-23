@@ -3,6 +3,8 @@ require_relative 'pawn.rb'
 require_relative 'king.rb'
 require_relative 'knight.rb'
 require_relative 'rooke.rb'
+require_relative 'bishop.rb'
+require_relative 'queen.rb'
 
 class GameBoard
   attr_accessor :player_one, :player_two
@@ -54,7 +56,10 @@ class GameBoard
     board = @board
     board[7][0] = Rooke.new(7, 0, 'white')
     board[7][1] = Knight.new(7, 1, 'white')
+    board[7][2] = Bishop.new(7, 2, 'white')
     board[7][3] = King.new(7, 3, 'white')
+    board[7][4] = Queen.new(7, 4, 'white')
+    board[7][5] = Bishop.new(7, 5, 'white')
     board[7][6] = Knight.new(7, 6, 'white')
     board[7][7] = Rooke.new(7, 7, 'white')
     update_board(board)
@@ -64,7 +69,10 @@ class GameBoard
     board = @board
     board[0][0] = Rooke.new(0, 0, 'black')
     board[0][1] = Knight.new(0, 1, 'black')
+    board[0][2] = Bishop.new(0, 2, 'black')
     board[0][3] = King.new(0, 3, 'black')
+    board[0][4] = Queen.new(0, 4, 'black')
+    board[0][5] = Bishop.new(0, 5, 'black')
     board[0][6] = Knight.new(0, 6, 'black')
     board[0][7] = Rooke.new(0, 7, 'black')
     update_board(board)
@@ -96,7 +104,7 @@ class GameBoard
     end
   end
 
-  def free_spaces(piece)
+  def free_spaces_h_V(piece)
     position = accurate_positions(piece[0], piece[1])
     right = free_spaces_right(position)
     left = free_spaces_left(position)
@@ -121,7 +129,6 @@ class GameBoard
         free_spaces.push(down)
       end
     end
-    p free_spaces
     free_spaces
   end
 
@@ -140,6 +147,65 @@ class GameBoard
   def free_spaces_down(down)
     [(down[0] + 1), (down[1])]
   end
+
+
+
+
+
+  def free_spaces_d(piece)
+    position = accurate_positions(piece[0], piece[1])
+    up_right = free_spaces_up_right(position)
+    up_left = free_spaces_up_left(position)
+    down_right = free_spaces_down_right(position)
+    down_left = free_spaces_down_left(position)
+    free_spaces = [up_right, up_left, down_right, down_left]
+    while (@board[up_right[0]][up_right[1]] == @light_black || @board[up_right[0]][up_right[1]] == @light_magenta) && up_right[1] >= 0
+      up_right = free_spaces_up_right(up_right)
+      free_spaces.push(up_right)
+    end
+    while (@board[up_left[0]][up_left[1]] == @light_black || @board[up_left[0]][up_left[1]] == @light_magenta) && up_left[1] >= 0
+      up_left = free_spaces_up_left(up_left)
+      free_spaces.push(up_left)
+    end
+    if down_right[0] < 7
+      while (@board[down_right[0]][down_right[1]] == @light_black || @board[down_right[0]][down_right[1]] == @light_magenta) && down_right[0] < 7
+        down_right = free_spaces_down_right(down_right)
+        free_spaces.push(down_right)
+      end
+    end
+    if down_left[0] < 7
+      while (@board[down_left[0]][down_left[1]] == @light_black || @board[down_left[0]][down_left[1]] == @light_magenta) && down_left[0] < 7
+        down_left = free_spaces_down_left(down_left)
+        free_spaces.push(down_left)
+      end
+    end
+    free_spaces
+  end
+
+  def free_spaces_up_right(up_right)
+    [(up_right[0] - 1), (up_right[1] + 1)]
+  end
+
+  def free_spaces_up_left(up_left)
+    [(up_left[0] - 1), (up_left[1] - 1)]
+  end
+
+  def free_spaces_down_right(down_right)
+    [(down_right[0] + 1), (down_right[1] + 1)]
+  end
+
+  def free_spaces_down_left(down_left)
+    [(down_left[0] + 1), (down_left[1] - 1)]
+  end
+
+  def all_free_spaces(piece)
+    hv_array = free_spaces_h_V(piece)
+    d_array = free_spaces_d(piece)
+    hv_array.concat(d_array)
+  end
+
+
+
 
   def move_piece(piece, move_a, free_spaces)
     position = accurate_positions(move_a[0], move_a[1])
@@ -222,23 +288,25 @@ class GameBoard
     piece = gets.chomp.split('').map(&:to_i)
     position = accurate_positions(piece[0], piece[1])
     toggle = toggle_piece(piece, player)
-    free_spaces = free_spaces(piece)
+    free_spaces = all_free_spaces(piece)
     puts 'Select move location.'
     move = gets.chomp.split('').map(&:to_i)
     if @board[position[0]][position[1]].is_a?(Knight)
-      p 'knight'
       if knight_move_piece(toggle, move)
+        true
       elsif knight_attack_piece(toggle, move)
+        true
       else
-        puts 'Not a valid move.'
+        false
       end
     else
       if move_piece(toggle, move, free_spaces)
+        true
       elsif attack_piece(toggle, move, free_spaces)
+        true
       else
-        puts 'Not a valid move.'
+        false
       end
     end
   end
-
 end

@@ -1,0 +1,72 @@
+require 'colorize'
+require_relative 'game_board.rb'
+
+class Bishop
+  attr_accessor :piece, :position, :team
+
+  def initialize(y, x, team)
+    @team = team
+    @base = [y,x]
+    @position = [y, x]
+    if team == 'white'
+      @piece = @position[0] % 2 == 0 ? (@position[1] % 2 == 0 ? " \u2657 ".colorize( :background => :light_black)  : " \u2657 ".colorize( :background => :light_magenta)) : (@position[1] % 2 == 0 ? " \u2657 ".colorize( :background => :light_magenta)  : " \u2657 ".colorize( :background => :light_black))
+    else
+      @piece = @position[0] % 2 == 0 ? (@position[1] % 2 == 0 ? " \u265D ".colorize( :color => :black, :background => :light_black)  : " \u265D ".colorize( :color => :black, :background => :light_magenta)) : (@position[1] % 2 == 0 ? " \u265D ".colorize( :color => :black, :background => :light_magenta)  : " \u265D ".colorize( :color => :black, :background => :light_black))
+    end
+  end
+
+  def return_possible_moves
+    array = []
+    up_right = @position
+    up_left = @position
+    down_right = @position
+    down_left = @position
+    until up_right[1] > 6 || up_right[0] < 1
+      up_right = [(up_right[0] - 1), (up_right[1] + 1)]
+      array.push(up_right)
+    end
+    until up_left[1] < 1 || up_left[0] < 1
+      up_left = [(up_left[0] - 1), (up_left[1] - 1)]
+      array.push(up_left)
+    end
+    until down_right[0] > 6 || down_right[1] > 6
+      down_right = [(down_right[0] + 1), (down_right[1] + 1)]
+      array.push(down_right)
+    end
+    until down_left[0] > 6 || down_left[1] < 1
+      down_left = [(down_left[0] + 1), (down_left[1] - 1)]
+      array.push(down_left)
+    end
+    array
+  end
+
+  def move_set(move)
+    possible_moves = return_possible_moves
+    if possible_moves.any?(move)
+      true
+    else
+      false
+    end
+  end
+
+  def attack_set(move)
+    possible_moves = return_possible_moves
+    if possible_moves.any?(move)
+      true
+    else
+      false
+    end
+  end
+
+  def update_position(move)
+    @position = move
+  end
+
+  def update_piece
+    if team == 'white'
+      @piece = @position[0] % 2 == 0 ? (@position[1] % 2 == 0 ? " \u2657 ".colorize( :background => :light_black)  : " \u2657 ".colorize( :background => :light_magenta)) : (@position[1] % 2 == 0 ? " \u2657 ".colorize( :background => :light_magenta)  : " \u2657 ".colorize( :background => :light_black))
+    else
+      @piece = @position[0] % 2 == 0 ? (@position[1] % 2 == 0 ? " \u265D ".colorize( :color => :black, :background => :light_black)  : " \u265D ".colorize( :color => :black, :background => :light_magenta)) : (@position[1] % 2 == 0 ? " \u265D ".colorize( :color => :black, :background => :light_magenta)  : " \u265D ".colorize( :color => :black, :background => :light_black))
+    end
+  end
+end
