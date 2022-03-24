@@ -1,5 +1,10 @@
 require 'colorize'
 require_relative 'game_board.rb'
+require_relative 'king.rb'
+require_relative 'knight.rb'
+require_relative 'rooke.rb'
+require_relative 'bishop.rb'
+require_relative 'queen.rb'
 
 class Pawn
   attr_accessor :piece, :position, :team

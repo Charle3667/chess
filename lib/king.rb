@@ -41,6 +41,14 @@ class King
     end
   end
 
+  def return_possible_moves
+    possible_moves = [[(@position[0] - 1), @position[1]], 
+[(@position[0] - 1), (@position[1] +1)], [(@position[0]), (@position[1] +1)], 
+[(@position[0] + 1), (@position[1] +1)], [(@position[0] + 1), (@position[1])], 
+[(@position[0] + 1), (@position[1] - 1)], [(@position[0]), (@position[1] - 1)], 
+[(@position[0] - 1), (@position[1] - 1)]]
+  end
+
   def update_position(move)
     @position = move
   end
