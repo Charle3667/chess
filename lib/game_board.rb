@@ -7,12 +7,13 @@ require_relative 'bishop.rb'
 require_relative 'queen.rb'
 
 class GameBoard
-  attr_accessor :player_one, :player_two
+  attr_accessor :player_one, :player_two, :game_over
 
   def initialize
     @white_check = false
     @black_check = false
     @checkmate = false
+    @game_over = false
     puts 'Player one, please enter your name.'
     # white
     @player_one = gets.chomp
@@ -84,8 +85,8 @@ class GameBoard
   end
 
   def set_board
-    # place_white_pawns
-    # place_black_pawns
+    place_white_pawns
+    place_black_pawns
     place_white_back
     place_black_back
   end
@@ -99,12 +100,14 @@ class GameBoard
         @board[position[0]][position[1]]
       else
         puts 'Not your piece'
+        false
       end
     else
       if @board[position[0]][position[1]].team == 'black'
         @board[position[0]][position[1]]
       else
         puts 'Not your piece'
+        false
       end
     end
   end
@@ -305,30 +308,48 @@ class GameBoard
         # end
       end
     end
-    puts "#{player}, select piece to move."
-    piece = gets.chomp.split('').map(&:to_i)
-    position = accurate_positions(piece[0], piece[1])
-    toggle = toggle_piece(piece, player)
-    free_spaces = all_free_spaces(accurate_positions(piece[0], piece[1]))
-    puts 'Select move location.'
-    move = gets.chomp.split('').map(&:to_i)
-    if @board[position[0]][position[1]].is_a?(Knight)
-      if knight_move_piece(toggle, move)
-        true
-      elsif knight_attack_piece(toggle, move)
-        true
-      else
-        false
+    piece = nil
+    toggle = nil
+    correct_piece = false
+    until correct_piece == true
+      puts "#{player}, select piece to move."
+      s_piece = gets.chomp
+      piece = s_piece.split('').map(&:to_i)
+      if s_piece == 'q'
+        @game_over = true
+        break
+      elsif piece == [] || piece[0] > 8 || piece[1] > 8
+        puts 'Not a piece'
+      elsif toggle_piece(piece, player)
+        toggle = toggle_piece(piece, player)
+        correct_piece = true
       end
+    end
+    if @game_over == true
+      return
     else
-      if move_piece(toggle, move, free_spaces)
-        premote_pawn(move)
-        true
-      elsif attack_piece(toggle, move, free_spaces)
-        premote_pawn(move)
-        true
+      position = accurate_positions(piece[0], piece[1])
+      free_spaces = all_free_spaces(accurate_positions(piece[0], piece[1]))
+      puts 'Select move location.'
+      move = gets.chomp.split('').map(&:to_i)
+      if @board[position[0]][position[1]].is_a?(Knight)
+        if knight_move_piece(toggle, move)
+          true
+        elsif knight_attack_piece(toggle, move)
+          true
+        else
+          false
+        end
       else
-        false
+        if move_piece(toggle, move, free_spaces)
+          premote_pawn(move)
+          true
+        elsif attack_piece(toggle, move, free_spaces)
+          premote_pawn(move)
+          true
+        else
+          false
+        end
       end
     end
   end

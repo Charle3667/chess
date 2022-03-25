@@ -7,6 +7,9 @@ game.display_board
 # game.pawn_positions
 it = 0
 until it == 24 do
+  if game.game_over
+    break
+  end
   if it % 2 == 0
     valid_move = false
     until valid_move == true
@@ -14,8 +17,12 @@ until it == 24 do
         game.display_board
         valid_move = true
       else
-        game.display_board
-        p 'Invalid move, try again.'
+        if game.game_over
+          break
+        else
+          game.display_board
+          p 'Invalid move, try again.'
+        end
       end
     end
   else
@@ -25,8 +32,12 @@ until it == 24 do
         game.display_board
         valid_move = true
       else
-        game.display_board
-        p 'Invalid move, try again.'
+        if game.game_over
+          break
+        else
+          game.display_board
+          p 'Invalid move, try again.'
+        end
       end
     end
   end
