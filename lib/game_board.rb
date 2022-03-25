@@ -287,22 +287,22 @@ class GameBoard
     if player == @player_one
       is_check('white')
       if @white_check == true
-        is_checkmate('white')
-        if @checkmate == true
-          puts "Checkmate. #{@player_two} wins the game"
-        else
+        # is_checkmate('white')
+        # if @checkmate == true
+        #   puts "Checkmate. #{@player_two} wins the game"
+        # else
           puts 'White King is in Check' if @white_check == true
-        end
+        # end
       end
     else
       is_check('black')
       if @black_check == true
-        is_checkmate('black')
-        if @checkmate == true
-          puts "Checkmate. #{@player_one} wins the game"
-        else
+        # is_checkmate('black')
+        # if @checkmate == true
+        #   puts "Checkmate. #{@player_one} wins the game"
+        # else
           puts 'Black King is in Check' if @black_check == true
-        end
+        # end
       end
     end
     puts "#{player}, select piece to move."
@@ -400,6 +400,12 @@ class GameBoard
                 end
               end
             end
+          elsif slot.is_a?(Knight)
+            if slot.team == 'black'
+              if slot.attack_set(king_position)
+                @white_check = true
+              end
+            end
           end
         end
       end
@@ -407,13 +413,19 @@ class GameBoard
       @black_check = false
       for array in board 
         for slot in array
-          if slot.is_a?(Queen) || slot.is_a?(Rooke) || slot.is_a?(Knight) || slot.is_a?(Bishop) || slot.is_a?(Pawn)
+          if slot.is_a?(Queen) || slot.is_a?(Rooke) || slot.is_a?(Bishop) || slot.is_a?(Pawn)
             if slot.team == 'white'
               free_spaces = all_free_spaces(slot.position)
               if free_spaces.any?(king_position)
                 if slot.attack_set(king_position)
                   @black_check = true
                 end
+              end
+            end
+          elsif slot.is_a?(Knight)
+            if slot.team == 'white'
+              if slot.attack_set(king_position)
+                @black_check = true
               end
             end
           end
@@ -468,7 +480,7 @@ class GameBoard
         array.each_with_index do |piece, x|
           if slot.return_possible_moves.any?([x, y])
             last_position = slot.position
-            new_board = @board
+            new_board = the_board
             new_board[y][x] = slot
             new_board[last_position[0]][last_position[1]] = last_position[0] % 2 == 0 ? (last_position[1] % 2 == 0 ? "   ".colorize( :background => :light_black)  : "   ".colorize( :background => :light_magenta)) : (last_position[1] % 2 == 0 ? "   ".colorize( :background => :light_magenta)  : "   ".colorize( :background => :light_black))
             unless is_check_bool(team, new_board)
@@ -485,7 +497,7 @@ class GameBoard
           if free_spaces.any?([x, y])
             if slot.return_possible_moves.any?([x, y])
               last_position = slot.position
-              new_board = @board
+              new_board = the_board
               new_board[y][x] = slot
               new_board[last_position[0]][last_position[1]] = last_position[0] % 2 == 0 ? (last_position[1] % 2 == 0 ? "   ".colorize( :background => :light_black)  : "   ".colorize( :background => :light_magenta)) : (last_position[1] % 2 == 0 ? "   ".colorize( :background => :light_magenta)  : "   ".colorize( :background => :light_black))
               unless is_check_bool(team, new_board)
