@@ -14,6 +14,7 @@ class GameBoard
     @black_check = false
     @checkmate = false
     @game_over = false
+    puts 'Welcome to Chess!'
     puts 'Player one, please enter your name.'
     # white
     @player_one = gets.chomp
@@ -85,8 +86,8 @@ class GameBoard
   end
 
   def set_board
-    place_white_pawns
-    place_black_pawns
+    # place_white_pawns
+    # place_black_pawns
     place_white_back
     place_black_back
   end
@@ -110,6 +111,24 @@ class GameBoard
         false
       end
     end
+  end
+
+  def valid_piece(player)
+    correct_piece = false
+    until correct_piece == true
+      puts "#{player}, select piece to move."
+      s_piece = gets.chomp
+      piece = s_piece.split('').map(&:to_i)
+      if s_piece == 'q'
+        @game_over = true
+        break
+      elsif piece == [] || piece[0] > 8 || piece[1] > 8
+        puts 'Not a piece'
+      elsif toggle_piece(piece, player)
+        correct_piece = true
+      end
+    end
+    piece
   end
 
   def free_spaces_h_V(piece)
@@ -287,47 +306,13 @@ class GameBoard
   end
 
   def move(player)
-    if player == @player_one
-      is_check('white')
-      if @white_check == true
-        # is_checkmate('white')
-        # if @checkmate == true
-        #   puts "Checkmate. #{@player_two} wins the game"
-        # else
-          puts 'White King is in Check' if @white_check == true
-        # end
-      end
-    else
-      is_check('black')
-      if @black_check == true
-        # is_checkmate('black')
-        # if @checkmate == true
-        #   puts "Checkmate. #{@player_one} wins the game"
-        # else
-          puts 'Black King is in Check' if @black_check == true
-        # end
-      end
-    end
-    piece = nil
+    check_checker(player)
     toggle = nil
-    correct_piece = false
-    until correct_piece == true
-      puts "#{player}, select piece to move."
-      s_piece = gets.chomp
-      piece = s_piece.split('').map(&:to_i)
-      if s_piece == 'q'
-        @game_over = true
-        break
-      elsif piece == [] || piece[0] > 8 || piece[1] > 8
-        puts 'Not a piece'
-      elsif toggle_piece(piece, player)
-        toggle = toggle_piece(piece, player)
-        correct_piece = true
-      end
-    end
+    piece = valid_piece(player)
     if @game_over == true
       return
     else
+      toggle = toggle_piece(piece, player)
       position = accurate_positions(piece[0], piece[1])
       free_spaces = all_free_spaces(accurate_positions(piece[0], piece[1]))
       puts 'Select move location.'
@@ -406,6 +391,20 @@ class GameBoard
     end
   end
 
+  def check_checker(player)
+    if player == @player_one
+      is_check('white')
+      if @white_check == true
+        puts 'White King is in Check' if @white_check == true
+      end
+    else
+      is_check('black')
+      if @black_check == true
+        puts 'Black King is in Check' if @black_check == true
+      end
+    end
+  end
+
   def is_check(team, board = @board)
     king_position = king_finder(team)
     if team == 'white'
@@ -480,98 +479,99 @@ class GameBoard
       end
     end
   end
-
-  def is_checkmate(team)
-    the_board = @board
-    for array in the_board
-      for slot in array
-        if slot.is_a?(Queen) || slot.is_a?(Rooke) || slot.is_a?(Knight) || slot.is_a?(Bishop) || slot.is_a?(Pawn) || slot.is_a?(King)
-          if slot.team == team
-            @checkmate = true if check_all_moves(slot, team, the_board)
-          end
-        end
-      end
-    end
-  end
-
-  def check_all_moves(slot, team, the_board)
-    check = true
-    if slot.is_a?(Knight)
-      the_board.each_with_index do |array, y|
-        array.each_with_index do |piece, x|
-          if slot.return_possible_moves.any?([x, y])
-            last_position = slot.position
-            new_board = the_board
-            new_board[y][x] = slot
-            new_board[last_position[0]][last_position[1]] = last_position[0] % 2 == 0 ? (last_position[1] % 2 == 0 ? "   ".colorize( :background => :light_black)  : "   ".colorize( :background => :light_magenta)) : (last_position[1] % 2 == 0 ? "   ".colorize( :background => :light_magenta)  : "   ".colorize( :background => :light_black))
-            unless is_check_bool(team, new_board)
-              check = false
-              break
-            end
-          end
-        end
-      end
-    else
-      free_spaces = all_free_spaces(slot.position)
-      the_board.each_with_index do |array, y|
-        array.each_with_index do |piece, x|
-          if free_spaces.any?([x, y])
-            if slot.return_possible_moves.any?([x, y])
-              last_position = slot.position
-              new_board = the_board
-              new_board[y][x] = slot
-              new_board[last_position[0]][last_position[1]] = last_position[0] % 2 == 0 ? (last_position[1] % 2 == 0 ? "   ".colorize( :background => :light_black)  : "   ".colorize( :background => :light_magenta)) : (last_position[1] % 2 == 0 ? "   ".colorize( :background => :light_magenta)  : "   ".colorize( :background => :light_black))
-              unless is_check_bool(team, new_board)
-                check = false
-                break
-              end
-            end
-          end
-        end
-      end
-    end
-    check
-  end
-
-  def is_check_bool(team, new_board)
-    king_position = king_finder(team)
-    check = false
-    if team == 'white'
-      for array in new_board 
-        for slot in array
-          if slot.is_a?(Queen) || slot.is_a?(Rooke) || slot.is_a?(Knight) || slot.is_a?(Bishop) || slot.is_a?(Pawn)
-            if slot.team == 'black'
-              free_spaces = all_free_spaces(slot.position)
-              if free_spaces.any?(king_position)
-                if slot.attack_set(king_position)
-                  check = true
-                end
-              end
-            end
-          end
-        end
-      end
-    else
-      for array in new_board 
-        for slot in array
-          if slot.is_a?(Queen) || slot.is_a?(Rooke) || slot.is_a?(Knight) || slot.is_a?(Bishop) || slot.is_a?(Pawn)
-            if slot.team == 'white'
-              free_spaces = all_free_spaces(slot.position)
-              if free_spaces.any?(king_position)
-                if slot.attack_set(king_position)
-                  check = true
-                end
-              end
-            end
-          end
-        end
-      end
-    end
-    check
-  end
 end
 
 
+# the land of lost code
+
+# def is_checkmate(team)
+#   the_board = @board
+#   for array in the_board
+#     for slot in array
+#       if slot.is_a?(Queen) || slot.is_a?(Rooke) || slot.is_a?(Knight) || slot.is_a?(Bishop) || slot.is_a?(Pawn) || slot.is_a?(King)
+#         if slot.team == team
+#           @checkmate = true if check_all_moves(slot, team, the_board)
+#         end
+#       end
+#     end
+#   end
+# end
+
+# def check_all_moves(slot, team, the_board)
+#   check = true
+#   if slot.is_a?(Knight)
+#     the_board.each_with_index do |array, y|
+#       array.each_with_index do |piece, x|
+#         if slot.return_possible_moves.any?([x, y])
+#           last_position = slot.position
+#           new_board = the_board
+#           new_board[y][x] = slot
+#           new_board[last_position[0]][last_position[1]] = last_position[0] % 2 == 0 ? (last_position[1] % 2 == 0 ? "   ".colorize( :background => :light_black)  : "   ".colorize( :background => :light_magenta)) : (last_position[1] % 2 == 0 ? "   ".colorize( :background => :light_magenta)  : "   ".colorize( :background => :light_black))
+#           if is_check_bool(team, new_board) == false
+#             check = false
+#             break
+#           end
+#         end
+#       end
+#     end
+#   else
+#     free_spaces = all_free_spaces(slot.position)
+#     the_board.each_with_index do |array, y|
+#       array.each_with_index do |piece, x|
+#         if free_spaces.any?([x, y])
+#           if slot.return_possible_moves.any?([x, y])
+#             last_position = slot.position
+#             new_board = the_board
+#             new_board[y][x] = slot
+#             new_board[last_position[0]][last_position[1]] = last_position[0] % 2 == 0 ? (last_position[1] % 2 == 0 ? "   ".colorize( :background => :light_black)  : "   ".colorize( :background => :light_magenta)) : (last_position[1] % 2 == 0 ? "   ".colorize( :background => :light_magenta)  : "   ".colorize( :background => :light_black))
+#             if is_check_bool(team, new_board) == false
+#               check = false
+#               break
+#             end
+#           end
+#         end
+#       end
+#     end
+#   end
+#   check
+# end
+
+# def is_check_bool(team, new_board)
+#   king_position = king_finder(team)
+#   check = false
+#   if team == 'white'
+#     for array in new_board 
+#       for slot in array
+#         if slot.is_a?(Queen) || slot.is_a?(Rooke) || slot.is_a?(Knight) || slot.is_a?(Bishop) || slot.is_a?(Pawn)
+#           if slot.team == 'black'
+#             free_spaces = all_free_spaces(slot.position)
+#             if free_spaces.any?(king_position)
+#               if slot.attack_set(king_position)
+#                 check = true
+#               end
+#             end
+#           end
+#         end
+#       end
+#     end
+#   else
+#     for array in new_board 
+#       for slot in array
+#         if slot.is_a?(Queen) || slot.is_a?(Rooke) || slot.is_a?(Knight) || slot.is_a?(Bishop) || slot.is_a?(Pawn)
+#           if slot.team == 'white'
+#             free_spaces = all_free_spaces(slot.position)
+#             if free_spaces.any?(king_position)
+#               if slot.attack_set(king_position)
+#                 check = true
+#               end
+#             end
+#           end
+#         end
+#       end
+#     end
+#   end
+#   check
+# end
 
 
 # def is_check(piece)

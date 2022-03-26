@@ -1,10 +1,10 @@
 require_relative 'game_board.rb'
 
 game = GameBoard.new
-game.display_board
 game.set_board
 game.display_board
 # game.pawn_positions
+
 it = 0
 until it == 24 do
   if game.game_over
