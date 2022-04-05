@@ -1,15 +1,25 @@
 require_relative 'game_board.rb'
 
-game = GameBoard.new
-game.set_board
-game.display_board
-# game.pawn_positions
+game = nil
+puts 'Welcome to Chess!'
+puts "To play a new game press enter. To load a saved game, enter 's'."
+answer = gets.chomp
 
-it = 0
-until it == 24 do
-  if game.game_over
-    break
-  end
+if answer == 's'
+  game = GameBoard.new
+  game.load_a_save?
+else
+  puts 'Player one, please enter your name.'
+  player_one = gets.chomp
+  puts 'Player two, please enter your name.'
+  player_two = gets.chomp
+  game = GameBoard.new(player_one, player_two)
+  game.set_board
+  game.display_board
+end
+
+it = game.turn
+until game.game_over do
   if it % 2 == 0
     valid_move = false
     until valid_move == true
@@ -42,4 +52,7 @@ until it == 24 do
     end
   end
   it += 1
+  game.next_turn
 end
+
+puts 'Thanks for playing!'

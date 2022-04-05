@@ -1,4 +1,5 @@
 require 'colorize'
+require 'json'
 require_relative 'pawn.rb'
 require_relative 'king.rb'
 require_relative 'knight.rb'
@@ -7,23 +8,109 @@ require_relative 'bishop.rb'
 require_relative 'queen.rb'
 
 class GameBoard
-  attr_accessor :player_one, :player_two, :game_over
+  attr_accessor :player_one, :player_two, :game_over, :turn
 
-  def initialize
+  def initialize(player_one = 'Player One', player_two = 'Player Two')
+    @turn = 0
     @white_check = false
     @black_check = false
     @checkmate = false
     @game_over = false
-    puts 'Welcome to Chess!'
-    puts 'Player one, please enter your name.'
     # white
-    @player_one = gets.chomp
-    puts 'Player two, please enter your name.'
+    @player_one = player_one
     # black
-    @player_two = gets.chomp
+    @player_two = player_two
     @light_black = '   '.colorize( :background => :light_black)
     @light_magenta = '   '.colorize( :background => :light_magenta)
     @board = Array.new(8) { |i| i % 2 == 0 ? Array.new(8) {|i| i % 2 == 0 ? '   '.colorize( :background => :light_black) : '   '.colorize( :background => :light_magenta)} : Array.new(8) {|i| i % 2 == 0 ? '   '.colorize( :background => :light_magenta) : '   '.colorize( :background => :light_black)} }
+  end
+
+  def next_turn
+    @turn += 1
+  end
+
+  def create_board_array
+    board_array = []
+    for array in @board
+      for slot in array
+        if slot.is_a?(Queen) || slot.is_a?(Rooke) || slot.is_a?(Knight) || slot.is_a?(Bishop) || slot.is_a?(Pawn) || slot.is_a?(King)
+          board_array.push([slot.class, slot.team, slot.position])
+        end
+      end
+    end
+    board_array
+  end
+
+  def create_json
+    board = create_board_array
+    JSON.dump ({
+      board: board,
+      player_one: @player_one,
+      player_two: @player_two,
+      turn: @turn
+    })
+  end
+
+  def save_game
+    data = create_json
+    puts 'What would you like to name your saved game?'
+    id = gets.strip
+    Dir.mkdir('saved_games') unless Dir.exist?('saved_games')
+    filename = "saved_games/save_#{id}.txt"
+    File.open(filename, 'w') do |file|
+      file.puts data
+    end
+    puts "Game has been saved as 'saved_games/save_#{id}.txt'."
+  end
+
+  def load_a_save?
+    save = choose_save_game
+    load_from_json(save)
+    display_board
+    puts 'Game loaded.'
+  end
+
+  def choose_save_game
+    puts 'Which game would you like to load?'
+    puts Dir.entries('saved_games')
+    answer = gets.strip
+    puts "saved_games/#{answer}"
+    if File.exist?("saved_games/#{answer}")
+      file = File.open("saved_games/#{answer}", 'r')
+      contents = file.read
+    else
+      puts 'File does not exits.'
+    end
+  end
+
+  def load_from_json(save)
+    data = JSON.parse(save)
+    board_array = data['board']
+    set_saved_board(board_array)
+    @player_one = data['player_one']
+    @player_two = data['player_two']
+    @turn = data['turn']
+  end
+
+  def set_saved_board(board_array)
+    for piece in board_array
+      y = piece[2][0]
+      x = piece[2][1]
+      team = piece[1]
+      if piece[0] == "Rooke"
+        @board[y][x] = Rooke.new(y, x, team)
+      elsif piece[0] == "Knight"
+        @board[y][x] = Knight.new(y, x, team)
+      elsif piece[0] == "Bishop"
+        @board[y][x] = Bishop.new(y, x, team)
+      elsif piece[0] == "King"
+        @board[y][x] = King.new(y, x, team)
+      elsif piece[0] == "Queen"
+        @board[y][x] = Queen.new(y, x, team)
+      elsif piece[0] == "Pawn"
+        @board[y][x] = Pawn.new(y, x, team)
+      end
+    end
   end
 
   def display_board(board = @board)
@@ -122,10 +209,14 @@ class GameBoard
   def valid_piece(player)
     correct_piece = false
     until correct_piece == true
-      puts "#{player}, select piece to move."
+      puts "#{player}, select piece to move. Or press 's' to save and quit."
       s_piece = gets.chomp
       piece = s_piece.split('').map(&:to_i)
       if s_piece == 'q'
+        @game_over = true
+        break
+      elsif s_piece == 's'
+        save_game
         @game_over = true
         break
       elsif piece == [] || piece[0] > 8 || piece[1] > 8
