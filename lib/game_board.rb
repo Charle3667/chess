@@ -11,6 +11,7 @@ class GameBoard
   attr_accessor :player_one, :player_two, :game_over, :turn
 
   def initialize(player_one = 'Player One', player_two = 'Player Two')
+    @en_passant = false
     @turn = 0
     @white_check = false
     @black_check = false
@@ -23,6 +24,10 @@ class GameBoard
     @light_black = '   '.colorize( :background => :light_black)
     @light_magenta = '   '.colorize( :background => :light_magenta)
     @board = Array.new(8) { |i| i % 2 == 0 ? Array.new(8) {|i| i % 2 == 0 ? '   '.colorize( :background => :light_black) : '   '.colorize( :background => :light_magenta)} : Array.new(8) {|i| i % 2 == 0 ? '   '.colorize( :background => :light_magenta) : '   '.colorize( :background => :light_black)} }
+  end
+
+  def reset_en_passant
+    @en_passant = false
   end
 
   def next_turn

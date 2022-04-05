@@ -53,6 +53,7 @@ until game.game_over do
   end
   it += 1
   game.next_turn
+  game.reset_en_passant
 end
 
 puts 'Thanks for playing!'
